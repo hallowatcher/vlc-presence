@@ -1,10 +1,16 @@
 const request = require('request');
+const DiscordRpc = require('discord-rpc');
+const moment = require('moment');
 require('dotenv').config();
 
-const pass = process.env.VLC_PASSWORD;
+const host = process.env.VLC_HOST || 'http://127.0.0.1:8080';
+const pass = process.env.VLC_PASSWORD || '';
+const interval = +process.env.MS_INTERVAL || 15000;
+const clientId = process.env.CLIENT_ID || '';
+
 const auth = new Buffer(':' + pass).toString('base64');
-const req = {
-  uri: 'http://127.0.0.1:8080/requests/status.json',
+const vlcRequest = {
+  uri: `${host}/requests/status.json`,
   method: 'GET',
   headers: {
     Authorization: 'Basic ' + auth,
@@ -13,21 +19,41 @@ const req = {
 };
 
 function updateStatus() {
-  request(req, (err, response, body) => {
+  request(vlcRequest, (err, response, body) => {
+    if (!rpc) {
+      console.log(
+        `RPC has not been initialized, trying again in ${interval /
+          100} seconds...`
+      );
+      return;
+    }
+
     if (err) {
-      console.log('HTTP server not responding, trying again in 15 seconds...');
+      console.log(
+        `HTTP server not responding, trying again in ${interval /
+          100} seconds...`
+      );
+      rpc.setActivity();
       return;
     }
 
     const vidState = JSON.parse(body);
-
     const time = vidState.time;
     const title = cleanName(vidState.information.category.meta.filename);
     const picKey = pictureKey(title);
 
-    console.log('title: ', title);
-    console.log('time: ', time);
-    console.log('pic key: ', picKey);
+    rpc.setActivity({
+      details: title,
+      state: 'watching',
+      startTimestamp: moment()
+        .subtract(time, 'seconds')
+        .toDate(),
+      largeImageKey: `${picKey}`,
+      largeImageText: title,
+      smallImageKey: `${picKey}`,
+      smallImageText: title,
+      instance: false
+    });
   });
 }
 
@@ -46,8 +72,18 @@ function cleanName(input) {
 }
 
 function pictureKey(input) {
-  return input.substr(0, 5).toLowerCase();
+  return input
+    .substr(0, 5)
+    .toLowerCase()
+    .trim();
 }
 
-updateStatus();
-setInterval(updateStatus, 15000);
+// Initialize Discord RPC
+const rpc = new DiscordRpc.Client({ transport: 'ipc' });
+
+rpc.on('ready', () => {
+  updateStatus();
+  setInterval(updateStatus, interval);
+});
+
+rpc.login(clientId).catch(console.error);
