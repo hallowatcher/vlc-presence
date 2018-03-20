@@ -1,0 +1,12 @@
+{
+  "name": "vlc-presence",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "https://github.com/hallowatcher/vlc-presence.git",
+  "author": "Uwe Wiemer <hallowatcher@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^5.0.1",
+    "request": "^2.85.0"
+  }
+}
