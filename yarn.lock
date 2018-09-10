@@ -11,6 +11,12 @@ ajv@^5.1.0:
     fast-json-stable-stringify "^2.0.0"
     json-schema-traverse "^0.3.0"
 
+anitomy-js@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/anitomy-js/-/anitomy-js-3.0.0.tgz#c17ad35a61d64d5c9b45a7e51d08201cf252fc8b"
+  dependencies:
+    nan "^2.10.0"
+
 asn1@~0.2.3:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/asn1/-/asn1-0.2.3.tgz#dac8787713c9966849fc8180777ebe9c1ddf3b86"
@@ -230,6 +236,10 @@ mime-types@^2.1.12, mime-types@~2.1.17:
 moment@^2.21.0:
   version "2.21.0"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.21.0.tgz#2a114b51d2a6ec9e6d83cf803f838a878d8a023a"
+
+nan@^2.10.0:
+  version "2.11.0"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.11.0.tgz#574e360e4d954ab16966ec102c0c049fd961a099"
 
 oauth-sign@~0.8.2:
   version "0.8.2"

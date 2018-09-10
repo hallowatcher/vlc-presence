@@ -1,6 +1,7 @@
 const request = require('request');
 const DiscordRpc = require('discord-rpc');
 const moment = require('moment');
+const anitomy = require('anitomy-js');
 require('dotenv').config();
 
 const host = process.env.VLC_HOST || 'http://127.0.0.1:8080';
@@ -19,7 +20,7 @@ const vlcRequest = {
 };
 
 function updateStatus() {
-  request(vlcRequest, (err, response, body) => {
+  request(vlcRequest, async (err, response, body) => {
     if (!rpc) {
       console.log(
         `RPC has not been initialized, trying again in ${interval /
@@ -39,12 +40,20 @@ function updateStatus() {
 
     const vidState = JSON.parse(body);
     const time = vidState.time;
-    const title = cleanName(vidState.information.category.meta.filename);
-    const picKey = pictureKey(title);
+    const animeData = await getAnimeData(
+      vidState.information.category.meta.filename
+    );
+
+    // Gather anime data
+    const title = animeData.anime_title;
+    const episode = animeData.episode_number;
+
+    // Placeholder
+    const picKey = pictureKey(animeData.anime_title);
 
     rpc.setActivity({
       details: title,
-      state: 'watching',
+      state: `Ep. ${episode}`,
       startTimestamp: moment()
         .subtract(time, 'seconds')
         .toDate(),
@@ -57,18 +66,8 @@ function updateStatus() {
   });
 }
 
-function cleanName(input) {
-  const authorRegex = new RegExp(/(\[.*?\]|\(.*?\)|\..*?$)/, 'gi');
-
-  let original = input + '';
-  let result = authorRegex.exec(original);
-
-  while (result) {
-    original = original.replace(result[0], '').trim();
-    result = authorRegex.exec(input);
-  }
-
-  return original;
+function getAnimeData(input) {
+  return anitomy.parse(input);
 }
 
 function pictureKey(input) {
